@@ -13,11 +13,16 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const unsubscribe = firestore.collection('quests').onSnapshot(snapshot => {
-      const data: { id: string; lat: number; lng: number; }[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        lat: doc.data().lat || 0, // Заглушка для поля lat
-        lng: doc.data().lng || 0, // Заглушка для поля lng
-      }));
+      const data: { id: string; lat: number; lng: number; }[] = snapshot.docs.sort((a, b) => a.data().timestamp - b.data().timestamp).map(doc => {
+        console.log(doc.data());
+        return (
+          {
+            id: doc.id,
+            lat: doc.data().location.lat || 0,
+            lng: doc.data().location.lng || 0,
+          }
+        )
+      });
       setMarkers(data);
     });
   
@@ -31,7 +36,7 @@ const HomePage: React.FC = () => {
       const newMarker = { lat: latlng.lat(), lng: latlng.lng() };
       firestore.collection('quests').add({
         location: newMarker,
-        timestamp: new Date().toISOString(),
+        timestamp: +new Date().getTime(),
       })
       .then((docRef) => {
         console.log('New quest added with ID: ', docRef.id);

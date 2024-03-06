@@ -1,6 +1,8 @@
 import React from 'react';
 import { GoogleMap, useLoadScript, Marker, Libraries } from '@react-google-maps/api';
 import { QuestType } from '../types/Quest';
+import { MarkerClusterer } from "@googlemaps/markerclusterer";
+import { Clusterer } from '@react-google-maps/marker-clusterer';
 
 const libraries: Libraries = ['places'];
 
@@ -23,7 +25,7 @@ interface MapComponentProps {
   deleteOneMarker: (index: number) => void;
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ markers, onMapClick, onMarkerDragEnd, onDeleteAllMarkers, deleteOneMarker }) => {
+const MapComponent: React.FC<MapComponentProps> = ({ markers, onMapClick, onMarkerDragEnd, deleteOneMarker }) => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: 'AIzaSyCaxLx9eKvm5uf-y_Ny6UquJsOLXDKcvvA',
     libraries,
@@ -31,6 +33,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ markers, onMapClick, onMark
 
   if (loadError) return <div>Error loading maps</div>;
   if (!isLoaded) return <div>Loading maps</div>;
+
+  const clusterMarker = new MarkerClusterer({markers})
 
   return (
     <GoogleMap
@@ -45,11 +49,11 @@ const MapComponent: React.FC<MapComponentProps> = ({ markers, onMapClick, onMark
           key={index}
           position={{ lat: marker.lat, lng: marker.lng }}
           draggable={true}
-          onDragEnd={(event) => onMarkerDragEnd(index, event)}
+          onDragEnd={(event: google.maps.MapMouseEvent) => onMarkerDragEnd(index, event)}
           onClick={() => deleteOneMarker(index)}
         />      
       ))}
-    </GoogleMap>
+    </GoogleMap >
   );
 };
 
